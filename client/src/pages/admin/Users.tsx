@@ -1,4 +1,6 @@
-import { useState } from 'react';
+// client/src/pages/admin/Users.tsx
+
+import { useState, useEffect } from 'react';
 import { Search, Filter, MoreHorizontal, Mail, Shield, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { DataTable } from '@/components/ui/data-table';
@@ -7,6 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { AddUserDialog } from '@/components/AddUserDialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { userService } from '@/services';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,17 +28,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-const users = [
-  { id: '1', name: 'Alex Thompson', email: 'alex.t@company.com', role: 'admin', status: 'active', department: 'Engineering', joined: 'Jan 15, 2024' },
-  { id: '2', name: 'Sarah Chen', email: 'sarah.c@company.com', role: 'manager', status: 'active', department: 'Marketing', joined: 'Mar 20, 2024' },
-  { id: '3', name: 'Mike Johnson', email: 'mike.j@company.com', role: 'user', status: 'active', department: 'Sales', joined: 'Apr 5, 2024' },
-  { id: '4', name: 'Emily Davis', email: 'emily.d@company.com', role: 'user', status: 'pending', department: 'HR', joined: 'Jun 10, 2024' },
-  { id: '5', name: 'Jordan Lee', email: 'jordan.l@company.com', role: 'manager', status: 'active', department: 'Engineering', joined: 'Jul 22, 2024' },
-  { id: '6', name: 'Casey Morgan', email: 'casey.m@company.com', role: 'user', status: 'inactive', department: 'Finance', joined: 'Aug 1, 2024' },
-  { id: '7', name: 'Taylor Swift', email: 'taylor.s@company.com', role: 'user', status: 'active', department: 'Legal', joined: 'Sep 15, 2024' },
-  { id: '8', name: 'Riley Anderson', email: 'riley.a@company.com', role: 'user', status: 'active', department: 'Operations', joined: 'Oct 3, 2024' },
-];
-
 const roleColors = {
   admin: 'bg-primary text-primary-foreground',
   manager: 'bg-accent text-accent-foreground',
@@ -47,27 +41,79 @@ const statusColors = {
 };
 
 export default function AdminUsers() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const { toast } = useToast();
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  // Fetch users
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const filters: any = {};
+      
+      if (roleFilter !== 'all') filters.role = roleFilter;
+      if (statusFilter !== 'all') filters.status = statusFilter;
+      if (searchQuery) filters.search = searchQuery;
+
+      const response = await userService.getAllUsers(filters);
+      setUsers(response.data);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error || 'Failed to fetch users',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch on mount and when filters change
+  useEffect(() => {
+    fetchUsers();
+  }, [roleFilter, statusFilter]);
+
+  // Search with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Delete user
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+
+    try {
+      await userService.deleteUser(userId);
+      toast({
+        title: 'Success',
+        description: 'User deleted successfully',
+      });
+      fetchUsers();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error || 'Failed to delete user',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const columns = [
     {
       key: 'name',
       header: 'User',
-      render: (user: typeof users[0]) => (
+      render: (user: any) => (
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
             <AvatarFallback className="bg-primary/20 text-primary text-sm">
-              {user.name.split(' ').map(n => n[0]).join('')}
+              {user.name.split(' ').map((n: string) => n[0]).join('')}
             </AvatarFallback>
           </Avatar>
           <div>
@@ -80,7 +126,7 @@ export default function AdminUsers() {
     {
       key: 'role',
       header: 'Role',
-      render: (user: typeof users[0]) => (
+      render: (user: any) => (
         <Badge className={`capitalize ${roleColors[user.role as keyof typeof roleColors]}`}>
           {user.role}
         </Badge>
@@ -89,7 +135,7 @@ export default function AdminUsers() {
     {
       key: 'status',
       header: 'Status',
-      render: (user: typeof users[0]) => (
+      render: (user: any) => (
         <Badge
           variant="outline"
           className={`capitalize ${statusColors[user.status as keyof typeof statusColors]}`}
@@ -104,15 +150,23 @@ export default function AdminUsers() {
       className: 'text-muted-foreground',
     },
     {
-      key: 'joined',
+      key: 'createdAt',
       header: 'Joined',
-      className: 'text-muted-foreground',
+      render: (user: any) => (
+        <span className="text-muted-foreground">
+          {new Date(user.createdAt).toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric' 
+          })}
+        </span>
+      ),
     },
     {
       key: 'actions',
       header: '',
       className: 'w-12',
-      render: (user: typeof users[0]) => (
+      render: (user: any) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -131,7 +185,10 @@ export default function AdminUsers() {
               Change Role
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem 
+              className="text-destructive"
+              onClick={() => handleDeleteUser(user.id)}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete User
             </DropdownMenuItem>
@@ -140,6 +197,18 @@ export default function AdminUsers() {
       ),
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="User Management" description="Loading users..." />
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -189,11 +258,11 @@ export default function AdminUsers() {
       </div>
 
       {/* Users Table */}
-      <DataTable columns={columns} data={filteredUsers} />
+      <DataTable columns={columns} data={users} />
 
       {/* Summary */}
       <div className="flex items-center justify-between text-sm text-muted-foreground animate-fade-in">
-        <p>Showing {filteredUsers.length} of {users.length} users</p>
+        <p>Showing {users.length} users</p>
       </div>
     </div>
   );

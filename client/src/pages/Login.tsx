@@ -1,3 +1,5 @@
+// client/src/pages/Login.tsx
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,28 +22,23 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        toast({
-          title: 'Welcome back!',
-          description: 'You have been logged in successfully.',
-        });
-        navigate('/dashboard');
-      }
-    } catch (error) {
+      await login(email, password);
+      
       toast({
-        title: 'Error',
-        description: 'Invalid credentials. Please try again.',
+        title: 'Welcome back!',
+        description: 'You have been logged in successfully.',
+      });
+      
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast({
+        title: 'Login Failed',
+        description: error.message || 'Invalid credentials. Please try again.',
         variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const quickLogin = (role: string) => {
-    setEmail(`${role}@accesshub.com`);
-    setPassword('password123');
   };
 
   return (
@@ -74,6 +71,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
                 className="h-12 bg-muted/50 border-border focus:border-primary"
               />
             </div>
@@ -95,6 +93,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
                 className="h-12 bg-muted/50 border-border focus:border-primary"
               />
             </div>
@@ -114,39 +113,6 @@ export default function Login() {
               )}
             </Button>
           </form>
-
-          {/* Quick Login Buttons (Demo) */}
-          <div className="space-y-3">
-            <p className="text-center text-sm text-muted-foreground">
-              Quick demo login:
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => quickLogin('admin')}
-              >
-                Admin
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => quickLogin('manager')}
-              >
-                Manager
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1"
-                onClick={() => quickLogin('user')}
-              >
-                User
-              </Button>
-            </div>
-          </div>
 
           {/* Register Link */}
           <p className="text-center text-sm text-muted-foreground">

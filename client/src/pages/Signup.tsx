@@ -1,16 +1,21 @@
+// client/src/pages/Signup.tsx
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Hexagon, ArrowRight, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { authService } from '@/services/authService';
 
 export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [department, setDepartment] = useState('Engineering');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -18,6 +23,7 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate passwords match
     if (password !== confirmPassword) {
       toast({
         title: 'Error',
@@ -29,15 +35,30 @@ export default function Signup() {
 
     setIsLoading(true);
 
-    // Simulate signup (demo only)
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Register user
+      await authService.register({
+        name,
+        email,
+        password,
+        department,
+      });
+
       toast({
         title: 'Account created!',
         description: 'Please sign in with your new account.',
       });
+      
       navigate('/login');
-    }, 1000);
+    } catch (error: any) {
+      toast({
+        title: 'Registration Failed',
+        description: error.message || 'Could not create account. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -70,6 +91,7 @@ export default function Signup() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                disabled={isLoading}
                 className="h-12 bg-muted/50 border-border focus:border-primary"
               />
             </div>
@@ -83,8 +105,27 @@ export default function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
                 className="h-12 bg-muted/50 border-border focus:border-primary"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <Select value={department} onValueChange={setDepartment} disabled={isLoading}>
+                <SelectTrigger className="h-12 bg-muted/50">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Engineering">Engineering</SelectItem>
+                  <SelectItem value="Marketing">Marketing</SelectItem>
+                  <SelectItem value="Sales">Sales</SelectItem>
+                  <SelectItem value="HR">HR</SelectItem>
+                  <SelectItem value="Finance">Finance</SelectItem>
+                  <SelectItem value="Operations">Operations</SelectItem>
+                  <SelectItem value="Legal">Legal</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -96,6 +137,8 @@ export default function Signup() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
+                disabled={isLoading}
                 className="h-12 bg-muted/50 border-border focus:border-primary"
               />
             </div>
@@ -109,6 +152,7 @@ export default function Signup() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                disabled={isLoading}
                 className="h-12 bg-muted/50 border-border focus:border-primary"
               />
             </div>
