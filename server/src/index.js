@@ -9,10 +9,13 @@ connectDB();
 
 app.use(cors({
   origin: process.env.CLIENT_URL || 'https://access-hub-full.onrender.com',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
+
+app.options('*', cors());
 
 app.use(express.json());
 
