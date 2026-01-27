@@ -9,7 +9,7 @@ const getAllUsers = async (req, res) => {
     if (role) query.role = role;
     if (status) query.status = status;
     if (department) query.department = department;
-    
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -73,9 +73,9 @@ const updateUser = async (req, res) => {
   try {
     const { name, email, department, status, role } = req.body;
     const userId = req.params.id;
-    
+
     const user = await User.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -89,7 +89,7 @@ const updateUser = async (req, res) => {
     if (name) user.name = name;
     if (email) user.email = email;
     if (department) user.department = department;
-    
+
     if (isAdmin) {
       if (status) user.status = status;
       if (role) user.role = role;
@@ -180,7 +180,7 @@ const getUserStats = async (req, res) => {
     const totalUsers = await User.countDocuments();
     const activeUsers = await User.countDocuments({ status: 'active' });
     const pendingUsers = await User.countDocuments({ status: 'pending' });
-    
+
     const usersByRole = await User.aggregate([
       {
         $group: {
