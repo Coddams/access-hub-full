@@ -22,7 +22,7 @@ export default function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate passwords match
     if (password !== confirmPassword) {
       toast({
@@ -48,7 +48,7 @@ export default function Signup() {
         title: 'Account created!',
         description: 'Please sign in with your new account.',
       });
-      
+
       navigate('/login');
     } catch (error: any) {
       toast({
@@ -63,10 +63,8 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Panel - Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8 animate-fade-in-up">
-          {/* Logo */}
           <div className="text-center">
             <Link to="/login" className="inline-flex items-center gap-3 mb-8">
               <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center shadow-glow animate-pulse-glow">
@@ -80,7 +78,6 @@ export default function Signup() {
             </p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
@@ -173,7 +170,6 @@ export default function Signup() {
             </Button>
           </form>
 
-          {/* Login Link */}
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{' '}
             <Link to="/login" className="text-primary hover:underline font-medium">
@@ -183,11 +179,10 @@ export default function Signup() {
         </div>
       </div>
 
-      {/* Right Panel - Decorative */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden bg-gradient-to-br from-primary/20 via-background to-accent/10">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.15),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,hsl(var(--accent)/0.1),transparent_50%)]" />
-        
+
         <div className="relative z-10 flex flex-col items-center justify-center w-full p-12">
           <div className="max-w-md text-center space-y-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
             <div className="grid grid-cols-3 gap-4 mb-8">

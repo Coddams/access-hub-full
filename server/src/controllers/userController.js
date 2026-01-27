@@ -1,18 +1,8 @@
-// src/controllers/userController.js
-
 const User = require('../models/User');
 const Activity = require('../models/Activity');
 
-/**
- * GET ALL USERS
- * 
- * GET /api/users
- * Query params: ?role=admin&status=active&search=john
- * Access: Admin only
- */
 const getAllUsers = async (req, res) => {
   try {
-    // Build query based on filters
     const { role, status, department, search } = req.query;
     let query = {};
 
@@ -20,7 +10,6 @@ const getAllUsers = async (req, res) => {
     if (status) query.status = status;
     if (department) query.department = department;
     
-    // Search by name or email
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -28,7 +17,6 @@ const getAllUsers = async (req, res) => {
       ];
     }
 
-    // Execute query
     const users = await User.find(query)
       .select('-password')
       .sort({ createdAt: -1 });
@@ -81,19 +69,11 @@ const getUser = async (req, res) => {
   }
 };
 
-/**
- * UPDATE USER
- * 
- * PUT /api/users/:id
- * Body: { name?, email?, department?, status? }
- * Access: Admin or self (self can't change role/status)
- */
 const updateUser = async (req, res) => {
   try {
     const { name, email, department, status, role } = req.body;
     const userId = req.params.id;
     
-    // Find user
     const user = await User.findById(userId);
     
     if (!user) {
@@ -103,12 +83,9 @@ const updateUser = async (req, res) => {
       });
     }
 
-    // Check if user is updating themselves or is admin
     const isSelf = req.user._id.toString() === userId;
     const isAdmin = req.user.role === 'admin';
 
-    // Users can update their own name, email, department
-    // Only admins can change role and status
     if (name) user.name = name;
     if (email) user.email = email;
     if (department) user.department = department;
@@ -125,7 +102,6 @@ const updateUser = async (req, res) => {
 
     await user.save();
 
-    // Log activity
     await Activity.createActivity(
       req.user._id,
       'updated',
@@ -150,12 +126,6 @@ const updateUser = async (req, res) => {
   }
 };
 
-/**
- * DELETE USER
- * 
- * DELETE /api/users/:id
- * Access: Admin only
- */
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -167,7 +137,6 @@ const deleteUser = async (req, res) => {
       });
     }
 
-    // Prevent deleting yourself
     if (req.user._id.toString() === req.params.id) {
       return res.status(400).json({
         success: false,
@@ -177,7 +146,6 @@ const deleteUser = async (req, res) => {
 
     await user.deleteOne();
 
-    // Log activity
     await Activity.createActivity(
       req.user._id,
       'user_deleted',

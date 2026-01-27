@@ -1,21 +1,11 @@
-// src/controllers/authController.js
-
 const User = require('../models/User');
 const Activity = require('../models/Activity');
 const { generateToken } = require('../utils/generateToken');
 
-/**
- * REGISTER NEW USER
- * 
- * POST /api/auth/register
- * Body: { name, email, password, department? }
- * Access: Public
- */
 const register = async (req, res, next) => {
   try {
     const { name, email, password, department } = req.body;
 
-    // Validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -23,7 +13,6 @@ const register = async (req, res, next) => {
       });
     }
 
-    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({
@@ -32,19 +21,16 @@ const register = async (req, res, next) => {
       });
     }
 
-    // Create new user
     const user = await User.create({
       name,
       email,
-      password,  // Will be hashed automatically by User model
+      password,
       department: department || 'Engineering',
-      role: 'user'  // New users start as regular users
+      role: 'user'
     });
 
-    // Generate token
     const token = generateToken(user._id, user.role);
 
-    // Log activity
     await Activity.createActivity(
       user._id,
       'user_created',
@@ -53,7 +39,6 @@ const register = async (req, res, next) => {
       'New user registration'
     );
 
-    // Send response
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
@@ -84,18 +69,10 @@ const register = async (req, res, next) => {
   }
 };
 
-/**
- * LOGIN USER
- * 
- * POST /api/auth/login
- * Body: { email, password }
- * Access: Public
- */
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -103,7 +80,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Find user (include password for comparison)
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
@@ -113,7 +89,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Check if password matches
     const isPasswordCorrect = await user.comparePassword(password);
 
     if (!isPasswordCorrect) {
@@ -123,14 +98,11 @@ const login = async (req, res) => {
       });
     }
 
-    // Update last login
     user.lastLogin = Date.now();
     await user.save();
 
-    // Generate token
     const token = generateToken(user._id, user.role);
 
-    // Log activity
     await Activity.createActivity(
       user._id,
       'login',
@@ -139,7 +111,6 @@ const login = async (req, res) => {
       'User logged in'
     );
 
-    // Send response (without password)
     res.status(200).json({
       success: true,
       message: 'Login successful',
@@ -170,15 +141,8 @@ const login = async (req, res) => {
   }
 };
 
-/**
- * GET CURRENT USER
- * 
- * GET /api/auth/me
- * Access: Private (requires token)
- */
 const getMe = async (req, res) => {
   try {
-    // req.user is set by protect middleware
     const user = await User.findById(req.user._id);
 
     res.status(200).json({
@@ -207,18 +171,8 @@ const getMe = async (req, res) => {
   }
 };
 
-/**
- * LOGOUT USER
- * 
- * POST /api/auth/logout
- * Access: Private
- * 
- * Note: With JWT, logout is mainly handled client-side by removing the token.
- * This endpoint logs the activity for audit purposes.
- */
 const logout = async (req, res) => {
   try {
-    // Log activity
     await Activity.createActivity(
       req.user._id,
       'logout',

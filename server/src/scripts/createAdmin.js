@@ -1,21 +1,11 @@
-// server/src/scripts/createAdmin.js
-
-/**
- * ADMIN SEEDER SCRIPT
- * 
- * This script creates an admin user or upgrades an existing user to admin.
- * Run with: node src/scripts/createAdmin.js
- */
-
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
-// Admin user details
 const ADMIN_DATA = {
   name: 'Admin User',
   email: 'admin@accesshub.com',
-  password: 'admin123',  // Change this!
+  password: 'admin123',
   role: 'admin',
   department: 'Operations',
   status: 'active'
@@ -23,12 +13,10 @@ const ADMIN_DATA = {
 
 const createAdmin = async () => {
   try {
-    // Connect to database
     console.log('Connecting to database...');
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB');
 
-    // Check if admin already exists
     let admin = await User.findOne({ email: ADMIN_DATA.email });
 
     if (admin) {
@@ -59,12 +47,10 @@ const createAdmin = async () => {
   } catch (error) {
     console.error('❌ Error:', error.message);
   } finally {
-    // Close database connection
     await mongoose.connection.close();
     console.log('Database connection closed.');
     process.exit(0);
   }
 };
 
-// Run the script
 createAdmin();

@@ -1,12 +1,4 @@
-// client/src/services/activityService.ts
-
 import api from '@/lib/api';
-
-/**
- * ACTIVITY SERVICE
- * 
- * All activity-related API calls.
- */
 
 interface Activity {
   _id: string;
@@ -35,10 +27,6 @@ interface ActivityStatsResponse {
 }
 
 export const activityService = {
-  /**
-   * Get current user's activities
-   * GET /api/activities/me?limit=50&type=view
-   */
   getMyActivities: async (filters?: {
     limit?: number;
     type?: string;
@@ -46,14 +34,10 @@ export const activityService = {
     const params = new URLSearchParams();
     if (filters?.limit) params.append('limit', filters.limit.toString());
     if (filters?.type) params.append('type', filters.type);
-    
+
     return await api.get(`/activities/me?${params.toString()}`);
   },
 
-  /**
-   * Get all activities (Manager/Admin)
-   * GET /api/activities?userId=xxx&type=view&limit=100
-   */
   getAllActivities: async (filters?: {
     userId?: string;
     type?: string;
@@ -65,14 +49,10 @@ export const activityService = {
     if (filters?.type) params.append('type', filters.type);
     if (filters?.action) params.append('action', filters.action);
     if (filters?.limit) params.append('limit', filters.limit.toString());
-    
+
     return await api.get(`/activities?${params.toString()}`);
   },
 
-  /**
-   * Get activity statistics
-   * GET /api/activities/stats
-   */
   getActivityStats: async (filters?: {
     userId?: string;
     startDate?: string;
@@ -82,7 +62,7 @@ export const activityService = {
     if (filters?.userId) params.append('userId', filters.userId);
     if (filters?.startDate) params.append('startDate', filters.startDate);
     if (filters?.endDate) params.append('endDate', filters.endDate);
-    
+
     return await api.get(`/activities/stats?${params.toString()}`);
   },
 };

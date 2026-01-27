@@ -1,18 +1,9 @@
-// src/controllers/activityController.js
-
 const Activity = require('../models/Activity');
 
-/**
- * GET USER'S ACTIVITIES
- * 
- * GET /api/activities/me
- * Query: ?limit=20&type=view
- * Access: Private (any authenticated user)
- */
 const getMyActivities = async (req, res) => {
   try {
     const { limit = 50, type } = req.query;
-    
+
     let query = { user: req.user._id };
     if (type) query.type = type;
 
@@ -46,13 +37,9 @@ const getMyActivities = async (req, res) => {
 const getAllActivities = async (req, res) => {
   try {
     const { userId, type, action, limit = 100 } = req.query;
-    
+
     let query = {};
-    
-    // Managers can only see their team's activities
-    // (For simplicity, we'll let them see all for now)
-    // In production, you'd filter by department or team
-    
+
     if (userId) query.user = userId;
     if (type) query.type = type;
     if (action) query.action = action;
@@ -87,10 +74,10 @@ const getAllActivities = async (req, res) => {
 const getActivityStats = async (req, res) => {
   try {
     const { userId, startDate, endDate } = req.query;
-    
+
     let matchStage = {};
     if (userId) matchStage.user = mongoose.Types.ObjectId(userId);
-    
+
     if (startDate || endDate) {
       matchStage.createdAt = {};
       if (startDate) matchStage.createdAt.$gte = new Date(startDate);

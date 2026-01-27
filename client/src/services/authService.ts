@@ -1,5 +1,3 @@
-// client/src/services/authService.ts
-
 import api from '@/lib/api';
 
 /**
@@ -89,10 +87,8 @@ export const authService = {
     try {
       await api.post('/auth/logout');
     } catch (error) {
-      // Even if logout fails on server, clear local data
       console.error('Logout error:', error);
     } finally {
-      // Clear local storage
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     }

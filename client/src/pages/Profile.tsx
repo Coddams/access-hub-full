@@ -36,7 +36,6 @@ export default function Profile() {
         description="Manage your account settings and preferences"
       />
 
-      {/* Profile Header Card */}
       <Card className="shadow-card animate-fade-in overflow-hidden">
         <div className="h-32 gradient-primary relative">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary-foreground)/0.1),transparent_50%)]" />
@@ -72,7 +71,6 @@ export default function Profile() {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Account Info */}
         <Card className="shadow-card animate-fade-in lg:col-span-2" style={{ animationDelay: '100ms' }}>
           <CardHeader>
             <CardTitle>Account Information</CardTitle>

@@ -30,25 +30,20 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  // Shared
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'user'] },
-  
-  // Admin only
+
   { title: 'Users', href: '/admin/users', icon: Users, roles: ['admin'] },
   { title: 'Roles', href: '/admin/roles', icon: Shield, roles: ['admin'] },
   { title: 'Logs', href: '/admin/logs', icon: ScrollText, roles: ['admin'] },
   { title: 'System', href: '/admin/system', icon: Settings, roles: ['admin'] },
-  
-  // Manager only
+
   { title: 'Team', href: '/manager/team', icon: Users2, roles: ['manager'] },
   { title: 'Reports', href: '/manager/reports', icon: BarChart3, roles: ['manager'] },
   { title: 'Activity', href: '/manager/activity', icon: Activity, roles: ['manager'] },
-  
-  // User only
+
   { title: 'My Activity', href: '/user/activity', icon: Activity, roles: ['user'] },
   { title: 'Resources', href: '/user/resources', icon: FolderOpen, roles: ['user'] },
-  
-  // Shared bottom
+
   { title: 'Profile', href: '/profile', icon: User, roles: ['admin', 'manager', 'user'] },
 ];
 
@@ -104,7 +99,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               {filteredItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
-                
+
                 return (
                   <li key={item.href}>
                     <Link

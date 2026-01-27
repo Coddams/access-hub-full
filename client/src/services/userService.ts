@@ -1,12 +1,4 @@
-// client/src/services/userService.ts
-
 import api from '@/lib/api';
-
-/**
- * USER SERVICE
- * 
- * All user management API calls.
- */
 
 interface User {
   id: string;
@@ -50,10 +42,6 @@ interface UserStatsResponse {
 }
 
 export const userService = {
-  /**
-   * Get all users with filters
-   * GET /api/users?role=admin&status=active&search=john
-   */
   getAllUsers: async (filters?: {
     role?: string;
     status?: string;
@@ -65,7 +53,7 @@ export const userService = {
     if (filters?.status) params.append('status', filters.status);
     if (filters?.department) params.append('department', filters.department);
     if (filters?.search) params.append('search', filters.search);
-    
+
     return await api.get(`/users?${params.toString()}`);
   },
 
@@ -77,26 +65,14 @@ export const userService = {
     return await api.get(`/users/${id}`);
   },
 
-  /**
-   * Update user
-   * PUT /api/users/:id
-   */
   updateUser: async (id: string, data: UpdateUserData): Promise<UserResponse> => {
     return await api.put(`/users/${id}`, data);
   },
 
-  /**
-   * Delete user
-   * DELETE /api/users/:id
-   */
   deleteUser: async (id: string): Promise<{ success: boolean; message: string }> => {
     return await api.delete(`/users/${id}`);
   },
 
-  /**
-   * Get user statistics
-   * GET /api/users/stats
-   */
   getUserStats: async (): Promise<UserStatsResponse> => {
     return await api.get('/users/stats');
   },

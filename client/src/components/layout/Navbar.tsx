@@ -1,5 +1,7 @@
+// client/src/components/layout/Navbar.tsx
+
 import { useState } from 'react';
-import { Bell, Menu, User, LogOut, Settings, ChevronDown, Check } from 'lucide-react';
+import { Bell, Menu, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,7 +33,7 @@ const notifications = [
 ];
 
 export function Navbar({ onMenuClick }: NavbarProps) {
-  const { user, logout, switchRole } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [notificationList, setNotificationList] = useState(notifications);
 
@@ -75,30 +77,10 @@ export function Navbar({ onMenuClick }: NavbarProps) {
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4">
-          {/* Role Switcher (Demo Only) */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
-                <Badge className={roleColors[user?.role || 'user']} variant="secondary">
-                  {user?.role}
-                </Badge>
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Switch Role (Demo)</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => switchRole('admin')}>
-                <Badge className={roleColors.admin}>Admin</Badge>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('manager')}>
-                <Badge className={roleColors.manager}>Manager</Badge>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => switchRole('user')}>
-                <Badge className={roleColors.user}>User</Badge>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Role Badge - Display Only */}
+          <Badge className={`${roleColors[user?.role || 'user']} hidden sm:inline-flex capitalize`} variant="secondary">
+            {user?.role}
+          </Badge>
 
           {/* Notifications */}
           <DropdownMenu>
@@ -173,6 +155,9 @@ export function Navbar({ onMenuClick }: NavbarProps) {
                   <span className="text-xs font-normal text-muted-foreground">
                     {user?.email}
                   </span>
+                  <Badge className={`${roleColors[user?.role || 'user']} mt-2 w-fit capitalize`} variant="secondary">
+                    {user?.role}
+                  </Badge>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
